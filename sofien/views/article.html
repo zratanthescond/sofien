@@ -1,0 +1,313 @@
+<div class="container-fluid">
+  <div class="row mt-4 mb-4">
+    <button type="button" class="btn btn-success btn-lg" id="displayForm">Ajouter produit</button>
+  </div>
+  <div id="formPlace" class="form-card" >
+    <form method="POST" id="addProduct" action="#" class="mt-4 " style="display:none;">
+      <fieldset>
+        <legend>Ajout/update Produit</legend>
+        <div class="form-group">
+          <label for="exampleInputEmail1">name Produit</label>
+          <input type="text" class="form-control" name="name" placeholder="Nom produit">
+        </div>
+        <div class="form-group">
+          <label for="exampleInputEmail1">prix achat</label>
+          <input type="number" step="0.01" class="form-control" name="buyPrice" placeholder="Prix achat">
+        </div>
+
+
+
+        <label for="exampleSelect2">market</label>
+        <div class="row">
+          <div id="exampleSelect2" class="col-md-6">
+
+          </div>
+          <div id="Prices" class="col-md-6">
+
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Ajouer</button>
+      </fieldset>
+    </form>
+  </div>
+  <table class="table table-hover mt-4" id="productArea">
+    <thead>
+      <tr>
+        <th scope="col">Nom</th>
+        <th scope="col">prix achat</th>
+        <th scope="col">prix jour</th>
+        <th scope="col">prix nuit</th>
+        <th scope="col">local</th>
+        <th scope="col">En Stock</th>
+      </tr>
+    </thead>
+    <tbody id="displayProduct">
+
+
+    </tbody>
+  </table>
+</div>
+<style>
+  .iconPos {
+
+    padding-top: 40%;
+  }
+</style>
+<script src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+<script>
+  $("#displayForm").click(function () {
+            if ($("#addProduct").is(":hidden")) {
+                $("#addProduct").slideDown("slow");
+            } else {
+                $("#addProduct").hide();
+            }
+            
+
+        })
+  $("#addProduct").submit(function (e) {
+    e.preventDefault();
+    //alert(JSON.stringify(data))
+    $.ajax({
+      url: "product/addProduct.php",
+      type: 'POST',
+      data: $("#addProduct").serialize(),
+
+      dataType: "json",
+      success: function (res) {
+        if (res.success == true) {
+          $("#nameMarket").val('')
+        }
+        displayProducts()
+      }
+    })
+
+  })
+  $('body').on("submit", "#UpdateProduct", function (e) {
+    e.preventDefault();
+    // alert($("#UpdateProduct").serialize())
+    $.ajax({
+      url: 'product/updateProduct.php',
+      type: 'POST',
+      data: $("#UpdateProduct").serialize(),
+      success: function (res) {
+        // alert(res)
+        displayProducts()
+      }
+    })
+
+  })
+  $(document).ready(function () {
+
+
+    createMarkets()
+    displayProducts()
+    testDark()
+
+  })
+  function getname(id) {
+    return $.ajax({
+      url: "market/getOneMarket.php?id=" + id,
+      type: 'GET',
+      datatype: 'json',
+      async: false
+
+    })
+
+  }
+  function getMarketName(id) {
+
+    var name = getname(id).done()
+    console.log(name)
+    data = JSON.parse(name.responseText)
+    // alert(data.name)
+    return data.name
+
+    console.log(name)
+
+  }
+  function createMarkets() {
+    $.ajax({
+      url: "market/getMarkets.php",
+      type: 'GET',
+      // added data type
+      dataType: "json",
+      success: function (res) {
+        var prices = ''
+        var g = ''
+        $(res).each(function () {
+          g += `<div class="row">
+          <div class="col-md-5"> 
+            <div class="form-group">
+          <label>${this.name}:</label>
+        </div>
+          </div>
+          <hr/>
+          <div class="col-md-1">
+            <div class="form-group">
+          <input type="checkbox" class="form-control" name="check_list[]" value="${this.id}" />
+        </div>
+          </div>
+        </div>`
+          prices += `<div class="row">
+          <div class="col-md-6"> 
+            <div class="form-group">
+              
+              <input type="number" step="0.01" class="form-control" name="dayPrice_${this.id}" placeholder="prix vente jour ${this.name}">
+           </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <input type="number" step="0.01" class="form-control" name="nightPrice_${this.id}" placeholder="prix vente nuit ${this.name}">
+           </div>
+          </div>
+        </div>`
+
+        })
+        $("#exampleSelect2").empty().append(g);
+        $("#Prices").empty().append(prices);
+      }
+    })
+  }
+  function addProductStock(id) {
+    var data = {};
+    data.idProduct = id;
+    data.much = $("#muchStock_" + id).val();
+    //alert(JSON.stringify(data))
+    $.ajax({
+      url: 'product/addProductStock.php',
+      type: 'POST',
+      data: data,
+      success: function (res) {
+        // alert(res)
+        displayProducts()
+      }
+    })
+
+  }
+  function more(id) {
+    $("#stock_" + id).empty().append(`<div class="form-group">
+  <div class="form-group">
+    <div class="input-group">
+      <input type="text" class="form-control" id="muchStock_${id}" aria-label="Amount (to the nearest dollar)">
+      <div class="input-group-append" >
+        <a href=javascript:addProductStock(${id}) class="btn btn-success" style="border-top-right-radius: 1.078rem;border-bottom-right-radius: 1.078rem;">
+        <i class="fas fa-plus-circle iconPos"></i></a>
+      </div>
+    </div>
+  </div>
+</div>
+    `)
+
+  }
+  function displayProducts() {
+    $.ajax({
+      url: "product/getProduct.php",
+      type: 'GET',
+      // added data type
+      dataType: "json",
+      success: function (res) {
+        var g = ''
+        $(res).each(function () {
+          g += ` <tr class="table-active">
+                                <th scope="row">${this.name} <i class="fas fa-users-cog fa-lg btn btn-success float-right" onclick="updateProduct(${this.id})"></i></th>
+                                <td>${this.buyPrice}</td>
+                                <td>${this.dayPrice}</td>
+                                <td>${this.nightPrice}</td>
+                                <td>${this.market}</td>
+                                <td id="stock_${this.id}">${this.Stock}<a href=javascript:more(${this.id}) class="btn btn-success float-right"><i class="fas fa-plus-circle"></i><a/></td>
+                             </tr>`
+
+        })
+        $("#displayProduct").empty().append(g);
+
+      }
+    }).done(function () {
+      $('#productArea').DataTable();
+    })
+  }
+  function updateProduct(id) {
+    // alert('update '+id);
+    $.ajax({
+      url: "product/getProductToUpdate.php?id=" + id,
+      type: 'GET',
+      success: function (res) {
+        res = JSON.parse(res)
+        var g = ` <form method="POST" id="UpdateProduct"  action="#" class="mt-4" >
+    <fieldset>
+    <input type="hidden" name="id" value=${res.id}>
+      <legend>update Produit</legend>
+      <div class="form-group">
+        <label for="exampleInputEmail1">name Produit</label>
+        <input type="text" class="form-control" name="name"  placeholder="Nom produit" value="${res.name}">
+      </div>
+      <div class="form-group">
+        <label for="exampleInputEmail1">prix achat</label>
+        <input type="number" step="0.01" class="form-control" name="buyPrice"  placeholder="Prix achat" value="${res.buyPrice}">
+      </div>
+      <label for="exampleSelect2">market</label>
+        <div class="row">
+        
+        <div id="exampleSelect2" class="col-md-6">
+          
+        </div>
+        <div id="Prices" class="col-md-6">
+
+        </div>
+        </div>
+      
+      <button type="submit" class="btn btn-primary">Modifier</button>
+    </fieldset>
+  </form>`
+        $("#formPlace").empty().append(g);
+        var checkboxs = ''
+        var prices=''
+        $(res.Markets).each(function () {
+          checkboxs += `<div class="row">
+          <div class="col-md-5"> 
+            <div class="form-group">
+          <label>${this.name}:</label>
+          </div>
+        </div>
+          <div class="col-md-1">
+            <div class="form-group">
+          <input type="checkbox" class="form-control" name="check_list[]" value="${this.id}" ${this.Relation} />
+          </div>
+        </div>
+        </div>`
+            
+         prices+=`<div class="row">
+          <div class="col-md-6"> 
+            <div class="form-group">
+              
+              <input type="number" step="0.01" class="form-control" name="dayPrice_${this.id}" placeholder="prix vente jour ${this.name}" value="${getCleanOject(this,'dayPrice')}">
+           </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <input type="number" step="0.01" class="form-control" name="nightPrice_${this.id}" placeholder="prix vente nuit ${this.name}" value="${getCleanOject(this,'nightPrice')}">
+           </div>
+          </div>
+        </div>`
+        })
+        
+       
+        $("#exampleSelect2").empty().append(checkboxs)
+        $("#Prices").empty().append(prices);
+
+      }
+    })
+  }
+  function getCleanOject(obj,value){
+    //alert(JSON.stringify(obj))
+    if (obj.Prices!=='undefined') {
+      return obj.Prices[value];
+      
+    }else{
+      return ''
+    }
+
+
+  }
+</script>

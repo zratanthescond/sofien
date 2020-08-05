@@ -1,0 +1,776 @@
+<style>
+    .top-auto {
+        top: auto
+    }
+
+    .fixed-right {
+        position: fixed;
+        top: 30vh;
+        right: 0;
+        width: 2rem;
+        background: #fff;
+        border-radius: 4px 0 0 4px;
+        -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+    }
+</style>
+<div class="row">
+    <div class="col-md-3 form-card">
+        <select class="form-control" id="marketSelect">
+
+        </select>
+    </div>
+    <div class="col-md-4 form-card">
+        <div class="form-group  row">
+            <label for="example-date-input" class="col-2 col-form-label">Date</label>
+            <div class="col-10">
+                <input class="form-control" type="date" value="" id="example-date-input">
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 form-card">
+        <select class="form-control" id="timeSelect">
+            <option value="jour">Jour</option>
+            <option value="nuit">Nuit</option>
+        </select>
+    </div>
+
+</div>
+<div class="card">
+    <div class="card-header bg-success"><i class="far fa-eye fa-2x align-self-center"></i></div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-xl col-md-4">
+                <div class="card h-100" style="border-radius: 2.6em;">
+                    <div class="row h-100 no-gutters">
+                        <div class="col-6 pl-3 pt-2">
+                            <h6>Vente</h6>
+                            <h5 id="sellsByDay"></h5>
+                        </div>
+                        <div class="col bg-success text-white d-flex stat-btn">
+                            <h1 class="mx-auto align-self-center">
+                                <i class="fas fas-2x fa-balance-scale"></i>
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl col-md-4">
+                <div class="card h-100" style="border-radius: 2.6em;">
+                    <div class="row h-100 no-gutters">
+                        <div class="col-6 pl-3 pt-2">
+                            <h6>Deponce</h6>
+                            <h5 id="deponceByDay"></h5>
+                        </div>
+                        <div class="col bg-danger text-white d-flex stat-btn">
+                            <h1 class="mx-auto align-self-center">
+                                <i class="fas fas-2x fa-balance-scale"></i>
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl col-md-4">
+                <div class="card h-100" style="border-radius: 2.6em;">
+                    <div class="row h-100 no-gutters">
+                        <div class="col-6 pl-3 pt-2">
+                            <h6>Net</h6>
+                            <h5 id="netByDay"></h5>
+                        </div>
+                        <div class="col bg-success text-white d-flex stat-btn">
+                            <h1 class="mx-auto align-self-center">
+                                <i class="fas fas fas-2x fa-cash-register"></i>
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row" id="displays">
+        <div class="col-md-6 ">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Produit</th>
+                        <th scope="col">stock jour</th>
+                        <th scope="col">Vendu </th>
+                        <th scope="col">Rest</th>
+                        <th scope="col">P.units</th>
+                        <th scope="col">M.Total</th>
+                    </tr>
+                </thead>
+                <tbody id="productController">
+
+
+                </tbody>
+            </table>
+
+        </div>
+        <div class="col-md-2">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Depense</th>
+                        <th scope="col">montant</th>
+                    </tr>
+                </thead>
+                <tbody id="displayDeponces">
+
+
+
+
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-2">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Offre</th>
+                        <th scope="col">Designation</th>
+                    </tr>
+                </thead>
+                <tbody id="displayOffre">
+
+
+
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-2">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Employer</th>
+                        <th scope="col"><i class="fas fa-check"></i></th>
+                        <th scope="col"><i class="fas fa-hand-holding-usd"></i></th>
+                    </tr>
+                </thead>
+                <tbody id="displayEmployer">
+
+
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-2 toShow" style="display: none;">
+
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Client</th>
+                        <th scope="col">montant</th>
+                    </tr>
+                </thead>
+                <tbody id="displayCredit">
+
+
+
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="fixed-right">
+    <button type="button" id="addElement" class="btn-floating btn-outline-danger btn-lg float-right"
+        title="ajout market"><i class="fas fa-plus fa-2x"></i></button>
+</div>
+<script>
+    function searchClient() {
+        // alert('here')
+        if ($("#clientName").val() == '') {
+            $("#searchClientArea").removeClass('show');
+
+
+        }
+        if ($("#clientSearch").val() != '' && $("#clientSearch").val() !== '') {
+            var name = $("#clientSearch").val()
+
+            $.ajax({
+                url: "market/searchClient.php",
+                type: 'POST',
+                data: { name: name },
+                success: function (res) {
+                    res = JSON.parse(res)
+                    var g = ''
+                    $(res).each(function () {
+                        g += `<li class="dropdown-item" id="searchInputClient" onclick="setSearchClientInput(\'${this.psudo}\',${this.id})">${this.psudo}</li>`
+
+                    })
+                    if (g !== '') {
+                        $("#searchClientArea").empty().append(g).addClass('show');
+                    }
+
+
+                }
+            })
+        }
+    }
+    function setSearchClientInput(name, id) {
+        $("#searchClientArea").empty().removeClass('show');
+        $("#clientName").val(name)
+        $("#idClientSearch").val(id);
+    }
+    var elementToResize = '';
+    var widthClass = ''
+    var newClass = '';
+    var resized = false;
+    function getClasse(classe) {
+        // alert(classe)
+        if (classe.indexOf('col-') != -1) {
+            return classe
+        }
+        return ''
+    }
+    function displayCredit() {
+        var id = localStorage.getItem('idMarket')
+        $.ajax({
+            url: "market/getCredit.php?idMarket=" + id + "&horraire=" + $("#timeSelect").val() + '&date=' + $("#example-date-input").val(),
+            type: 'GET',
+            dataType: "json",
+            success: function (res) {
+                var g = ''
+                var sum = 0;
+                ///console.log(res)
+                ///alert(JSON.stringify(res))
+                $(res).each(function () {
+                    g += `<tr class="table-active">
+                        <td scope="row">${this.Client.psudo}</th>
+                        <td>${this.much}</td>
+                    </tr>`
+                    sum += parseFloat(this.much)
+
+                })
+
+                $("#displayCredit").empty().append(g).append(`
+                <tr class="table-danger"><td colspan="6" class=""><span class="d-flex justify-content-center w-100">${sum}<span></td></tr>
+                    <tr class="table-success">
+                        <td scope="row"><input type="text" class="form-control" placeholder="client" onkeyup="searchClient()" id="clientName">
+                        <input type="hidden" id="idClientSearch" autocomplete="off"></td>
+                        <td><input type="text" step="0.01" class="form-control" placeholder="montant $$" id="creditMontant">
+                        <ul id="searchClientArea" class="dropdown-menu w-100 top-auto"></ul>
+                        </td>
+                    </tr>
+                    <tr class="table-success"><td colspan="6"> <a href="javascript:addCredit()" class="btn btn-secondary w-100">valider</a> </td></tr>
+                    `);
+            }
+        })
+    }
+    function addCredit() {
+        var data = {}
+        if ($("#idClientSearch").val() != '' && $("#creditMontant").val() !== '') {
+            data.idMarket = localStorage.getItem('idMarket')
+            data.idClient = $("#idClientSearch").val()
+            data.much = $("#creditMontant").val()
+            data.horraire = $("#timeSelect").val()
+            data.date = $("#example-date-input").val()
+            $.ajax({
+                url: "market/addCredit.php",
+                type: 'POST',
+                data: data,
+                success: function (res) {
+                    displayCredit();
+
+                }
+            })
+        }
+
+    }
+    $("#addElement").click(function () {
+        var width = 0;
+        if (resized == true) {
+            $("#addElement").find('i').removeClass('fa-minus').addClass('fa-plus');
+            $(elementToResize).removeClass(newClass).addClass(widthClass)
+            $('.toShow').hide().css('width','0% !important')
+            resized = false
+            return;
+
+        }
+        $("#displays").find('div').each(function () {
+            if ($(this).width() > width) {
+                width = $(this).width();
+                elementToResize = $(this);
+            }
+
+
+        })
+        //alert(width);
+        // alert($(elementToResize).width());
+        var classes = $(elementToResize).attr('class').split(' ')
+        //alert (JSON.stringify(classes)) ;
+
+        $(classes).each(function (k, v) {
+            var tempWidthClass = getClasse(v)
+            if (tempWidthClass != '') {
+                // alert('not empty')
+                widthClass = tempWidthClass.trim()
+
+            }
+        })
+        var numberWidth = widthClass[widthClass.length - 1];
+        // alert(numberWidth)
+        numberWidth = Math.round(numberWidth * 2 / 3);
+        newClass = 'col-md-' + numberWidth;
+        $(elementToResize).removeClass(widthClass).addClass(newClass)
+        resized = true;
+        $("#addElement").find('i').removeClass('fa-plus').addClass('fa-minus')
+        $('.toShow').show().css('width','100% !important')
+
+    })
+    function createMarkets(val = 0) {
+        $.ajax({
+            url: "market/getMarkets.php",
+            type: 'GET',
+            // added data type
+            dataType: "json",
+            success: function (res) {
+                var g = ''
+                $(res).each(function () {
+                    g += `<option  value="${this.id}">${this.name}</option>`
+
+                })
+                $("#marketSelect").empty().append(g);
+                if (val > 0) {
+                    //alert('hhhhhhhh')
+                    $("#marketSelect").val(val)
+                }
+            }
+        })
+        return $("#exampleSelect2")
+    }
+    $("#marketSelect").change(function () {
+        // alert( $("#example-date-input").val())
+        localStorage.setItem('idMarket', $("#marketSelect").val())
+        displayStats()
+        getProductByMarket()
+        displayDeponces();
+        getOffre();
+        displayEmployer()
+        displayCredit();
+    })
+    $("#example-date-input").change(function () {
+        // alert( $("#example-date-input").val())
+        displayStats()
+        getProductByMarket()
+        displayDeponces();
+        getOffre();
+        displayEmployer()
+        displayCredit();
+    })
+    $("#timeSelect").change(function () {
+        if ($("#timeSelect").val() == 'nuit') {
+            document.body.setAttribute('data-theme', 'dark');
+            getProductByMarket()
+            displayDeponces()
+            getOffre();
+            displayCredit();
+        } else {
+            document.body.removeAttribute('data-theme');
+            getProductByMarket()
+            displayDeponces();
+            getOffre();
+            displayCredit();
+        }
+
+    })
+    var focusedInput = '';
+    function addOffre() {
+        var data = {}
+        data.idUser = $("#appAdmins").val();
+        data.idMarket = localStorage.getItem('idMarket')
+        data.idProduct = $("#idProductSearch").val();
+        data.much = $("#productMuch").val();
+        data.horraire = $("#timeSelect").val()
+        data.date = $("#example-date-input").val()
+        // alert(JSON.stringify(data))
+        $.ajax({
+            url: 'market/setOffre.php',
+            type: 'POST',
+            data: data,
+            success: function (res) {
+                getOffre()
+            }
+        })
+    }
+    function getAdmins() {
+        $.ajax({
+            url: 'user/getUser.php',
+            type: 'GET',
+            success: function (res) {
+                res = JSON.parse(res)
+                var g = '';
+                $(res).each(function () {
+                    g += `<option value="${this.id}">${this.login}</option>`
+                })
+                $("#appAdmins").empty().append(g);
+
+
+            }
+
+        })
+    }
+
+    function getOffre() {
+        $.ajax({
+            url: 'market/getOffre.php?idMarket=' + localStorage.getItem('idMarket') + "&horraire=" + $("#timeSelect").val() + '&date=' + $("#example-date-input").val(),
+            type: 'GET',
+            success: function (res) {
+                res = JSON.parse(res)
+                var g = '';
+                $(res).each(function () {
+                    g += `<tr class="table-active">
+                        <td scope="row">${this.Product.name} / ${this.much}</th>
+                        <td>${this.User.login}</td>
+                    </tr>`
+                })
+                $("#displayOffre").empty().append(g).append(`<tr class="table-success">
+                        <td scope="row">
+
+
+                            <div class="form-group">
+                                <input type="text" step="0.01" class="form-control Default input"
+                                    placeholder="montant $$" id="productMuch">
+                                     <div>
+                                     <input type="text" class="form-control Default input" id="productSearch" onkeyup="searchProduct()" autocomplete="off">
+                                     <input type="hidden" id="idProductSearch" autocomplete="off">
+                                     <ul id="searchArea" class="dropdown-menu w-100 top-auto"></ul>
+                                     </div>
+                            </div>
+                        </td>
+                        <td><select class="form-control Default input" id="appAdmins">
+                             
+                            </select> 
+
+                        <div class="mt-2">
+                            <a href="javascript:addOffre()" class="btn btn-secondary w-100">valider</a> 
+                        </div>
+                        
+                        </td>
+                    </tr>
+                `);
+                getAdmins()
+
+            }
+
+        })
+    }
+
+    function setSearchInput(name, id) {
+        $("#searchArea").empty().removeClass('show');
+        $("#productSearch").val(name)
+        $("#idProductSearch").val(id);
+    }
+    
+    function searchProduct() {
+        // alert('here')
+        if ($("#productSearch").val() == '') {
+            $("#searchArea").removeClass('show');
+
+
+        }
+        if ($("#productSearch").val() != '' && $("#productSearch").val() !== '') {
+            var name = $("#productSearch").val()
+
+            $.ajax({
+                url: "product/searchProduct.php",
+                type: 'POST',
+                data: { name: name },
+                success: function (res) {
+                    res = JSON.parse(res)
+                    var g = ''
+                    $(res).each(function () {
+                        g += `<li class="dropdown-item" id="searchInput" onclick="setSearchInput(\'${this.name}\',${this.id})">${this.name}</li>`
+
+                    })
+                    if (g !== '') {
+                        $("#searchArea").empty().append(g).addClass('show');
+                    }
+
+
+                }
+            })
+        }
+    }
+    function displayStats() {
+        var id = localStorage.getItem('idMarket')
+        $.ajax({
+            url: "market/marketStats.php?id=" + id + "&horraire=" + $("#timeSelect").val() + '&date=' + $("#example-date-input").val(),
+            type: 'GET',
+            dataType: "json",
+            success: function (res) {
+                $("#sellsByDay").empty().append(res.sells)
+                $("#deponceByDay").empty().append(res.deponces)
+                $("#netByDay").empty().append(res.net)
+            }
+        })
+    }
+    function displayDeponces() {
+        var id = localStorage.getItem('idMarket')
+        $.ajax({
+            url: "deponce/getDeponces.php?idMarket=" + id + "&horraire=" + $("#timeSelect").val() + '&date=' + $("#example-date-input").val(),
+            type: 'GET',
+            dataType: "json",
+            success: function (res) {
+                var g = ''
+                var sum = 0;
+                ///console.log(res)
+                ///alert(JSON.stringify(res))
+                $(res).each(function () {
+                    g += `<tr class="table-active">
+                        <td scope="row">${this.name}</th>
+                        <td>${this.much}</td>
+                    </tr>`
+                    sum += parseFloat(this.much)
+
+                })
+
+                $("#displayDeponces").empty().append(g).append(`
+                <tr class="table-danger"><td colspan="6" class=""><span class="d-flex justify-content-center w-100">${sum}<span></td></tr>
+                    <tr class="table-success">
+                        <td scope="row"><input type="text" class="form-control" placeholder="depence" id="depenseName"></td>
+                        <td><input type="text" step="0.01" class="form-control" placeholder="montant $$" id="deponceMontant">
+                        </td>
+                    </tr>
+                    <tr class="table-success"><td colspan="6"> <a href="javascript:addDeponce()" class="btn btn-secondary w-100">valider</a> </td></tr>
+                    `);
+            }
+        })
+    }
+    function addDeponce() {
+        var data = {}
+        if ($("#deponseName").val() != '' && $("#deponceMontant").val() !== '') {
+            data.idMarket = localStorage.getItem('idMarket')
+            data.name = $("#depenseName").val()
+            data.much = $("#deponceMontant").val()
+            data.horraire = $("#timeSelect").val()
+            data.date = $("#example-date-input").val()
+            $.ajax({
+                url: "deponce/addDeponce.php",
+                type: 'POST',
+                data: data,
+                success: function (res) {
+                    displayDeponces();
+
+                }
+            })
+        }
+
+    }
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+    function setEmployerPresence(id) {
+        var input = $("#employerPresence_" + id)
+        var status = 0
+        if ($(input).is(':checked')) {
+            // alert('checked')
+            status = 1
+        } else {
+            // alert('unchecked')
+        }
+        var data = {};
+        data.idEmployer = id;
+        data.status = status;
+        data.idMarket = localStorage.getItem('idMarket')
+        data.date = $("#example-date-input").val()
+        $.ajax({
+            url: "employer/setEmployerPresence.php",
+            type: 'POST',
+            data: data,
+            success: function (res) {
+                //  alert(res)
+
+            }
+        })
+    }
+    function createAvance(type, id) {
+        // alert(type);
+        var much = $("#inputAvance_" + id).val()
+        if ((type.trim() == 'manque' || type.trim() == 'avance') && much !== '') {
+            var data = {}
+            data.idMarket = localStorage.getItem('idMarket')
+            data.type = type
+            data.idEmployer = id
+            data.much = much
+            data.date = data.date = $("#example-date-input").val()
+            $("#employerAvance_" + id).empty().append(`<p>${much}</p>
+                `)
+            $("#inputsArea_" + id).empty()
+            $.ajax({
+                url: 'market/setEmployerAvance.php',
+                type: 'POST',
+                data: data,
+                success: function (res) {
+                    alert(res)
+                }
+            })
+        }
+
+
+
+    }
+    function sendAvace(id) {
+        var type = $("#avanceSelect_" + id).val()
+        $("#inputsArea_" + id).empty().append(`
+      <input type="text" id="inputAvance_${id}" class="form-control" onblur="createAvance('\ ${type}\',${id})" aria-label="Amount (to the nearest dollar)">
+   `)
+
+
+    }
+    function setAvance(id) {
+        $("#employerAvance_" + id).find('p').remove();
+        $("#inputsArea_" + id).empty().append(`
+                <select  class="form-control Default input selectAvance" onchange="sendAvace(${id})" id="avanceSelect_${id}">
+                                 <option value="">select</option>
+                                <option value="avance">Avance</option>
+                                <option value="manque">Manque</option>
+                                </select></td>
+                `)
+
+    }
+    function displayEmployer() {
+        var id = localStorage.getItem('idMarket')
+        $.ajax({
+            url: "employer/getEmployersDetails.php?idMarket=" + id + '&date=' + $("#example-date-input").val(),
+            type: 'GET',
+            dataType: "json",
+            success: function (res) {
+                var g = ''
+                //console.log(res)
+                $(res).each(function () {
+                    g += `<tr class="table-warning">
+                        <th scope="row">${this.name}</th>
+                        <td><input id="employerPresence_${this.id}" class="form-check-input" onchange="setEmployerPresence(${this.id})" type="checkbox" value=""  ${this.presence}> </td>
+                        <td ><div id="employerAvance_${this.id}" onclick="setAvance(${this.id})"><p>${this.avance}</p></div> 
+                        <div id="inputsArea_${this.id}"></div> </td>
+                        </tr> `
+
+                })
+
+                $("#displayEmployer").empty().append(g);
+            }
+        })
+    }
+    function removeImput(colum, id) {
+        var inputSelector = capitalizeFirstLetter(colum);
+        var inputContent = $("#setDay" + inputSelector + "_" + id).val();
+        $("#setDay" + inputSelector + "_" + id).closest('td').text(inputContent);
+        $("#setDay" + inputSelector + "_" + id).remove();
+        if (colum == 'stock') {
+            var data = {};
+            data.idProduct = id;
+            data.much = inputContent;
+            data.idMarket = localStorage.getItem('idMarket')
+            data.horraire = $("#timeSelect").val()
+            data.date = $("#example-date-input").val()
+            $.ajax({
+                url: "market/setProductDayStock.php",
+                type: 'POST',
+                data: data,
+                success: function (res) {
+                    res = JSON.parse(res)
+                    // alert(res.errors)
+                    if (res.errors) {
+                        alert(res.errors)
+                    }
+
+                    getProductByMarket()
+
+
+                }
+            })
+        }
+        if (colum == 'sell') {
+            var data = {};
+            data.idProduct = id;
+            data.much = inputContent;
+            data.idMarket = localStorage.getItem('idMarket')
+            data.horraire = $("#timeSelect").val()
+            data.date = data.date = $("#example-date-input").val()
+            $.ajax({
+                url: "market/setProductDaySells.php",
+                type: 'POST',
+                data: data,
+                success: function (res) {
+                    res = JSON.parse(res)
+                    // alert(res.errors)
+                    if (res.errors) {
+                        alert(res.errors)
+                    }
+
+                    getProductByMarket()
+
+
+                }
+            })
+        }
+
+
+    }
+
+    function setDayStock(colum, id) {
+        var inputSelector = capitalizeFirstLetter(colum);
+        if (focusedInput != '') {
+            var inputContent = $("#" + focusedInput).val();
+            $("#" + focusedInput).closest('td').text(inputContent);
+            $("#" + focusedInput).remove();
+        }
+        $(":focus").each(function () {
+            focusedInput = this.id
+        });
+        if ($("#" + colum + "Day_" + id).find('input').length === 0) {
+            var content = $("#" + colum + "Day_" + id).text();
+            var g = `<input id="setDay${inputSelector}_${id}" type="number" step="0.01" onblur="removeImput('${colum}',${id})" class="form-control Default input" autofocus>`
+            $("#" + colum + "Day_" + id).empty().append(g);
+            $("#" + colum + "Day_" + id).find('input').focus();;
+        }
+
+    }
+    function getProductByMarket() {
+        var id = localStorage.getItem('idMarket')
+        //console.log(id)
+
+        $.ajax({
+            url: "market/getOneMarket.php?id=" + id + "&horraire=" + $("#timeSelect").val() + '&date=' + $("#example-date-input").val(),
+            type: 'GET',
+            dataType: "json",
+            success: function (res) {
+                var g = ''
+                var sum = 0;
+                //console.log(res)
+                $(res.Products).each(function () {
+                    g += ` <tr class="table-active">
+                        <th scope="row">${this.name}<div class="badge badge-success float-right">${this.Stock}</div> </th>
+                        <td id="stockDay_${this.id}" onclick="setDayStock('stock',${this.id})" style="cursor: pointer;">${this.dayStock}</td>
+                        <td id="sellDay_${this.id}" onclick="setDayStock('sell',${this.id})" style="cursor: pointer;">${this.sells}</td>
+                        <td>${this.rest}</td>
+                        <td>${this.dayPrice}</td>
+                        <td>${this.price}</td>
+                    </tr>`
+                    sum += this.price;
+                })
+                g += '<tr class="table-success"><td></td><td></td><td></td><td></td><td></td><td class="">' + sum + '</td></tr> '
+                $("#nameMarket").empty().append(res.name)
+                $("#productController").empty().append(g);
+            }
+        })
+
+    }
+    $(document).ready(function () {
+        displayStats()
+        getProductByMarket()
+        displayEmployer()
+        displayDeponces()
+        getAdmins()
+        getOffre()
+        
+        displayCredit()
+        createMarkets(localStorage.getItem('idMarket'))
+    })
+
+</script>

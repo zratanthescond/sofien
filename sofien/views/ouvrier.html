@@ -1,0 +1,182 @@
+<div class="container-fluid">
+  <div class="row mt-4 mb-4">
+    <button type="button" class="btn btn-success btn-lg" id="displayForm">Ajouter Ouvrier</button>
+  </div>
+  <div id="formPlace">
+  <form method="POST" id="addEmployer" action="#" class="mt-4 form-card" style="display: none;">
+    <fieldset>
+      <legend>Ajout/update Employer</legend>
+      <div class="form-group">
+        <label for="exampleInputEmail1">name Employer</label>
+        <input type="text" class="form-control" name="name" id="name" placeholder="Nom ">
+      </div>
+      <div class="form-group">
+        <label for="exampleInputEmail1">prenom </label>
+        <input type="text" class="form-control" name="lastName" id="name" placeholder="prenom">
+      </div>
+      <div class="form-group">
+        <label for="exampleInputEmail1">salaire par jour</label>
+        <input type="number" step="0.01" class="form-control" name="daySalary" id="name" placeholder="salaire par jour">
+      </div>
+
+      <div class="form-group">
+        <label for="exampleSelect2">market</label>
+        <select class="form-control" name="idMarket" id="exampleSelect2">
+
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Ajouer</button>
+    </fieldset>
+  </form>
+</div>
+  <table class="table table-hover mt-4">
+    <thead>
+      <tr>
+        <th scope="col">Nom</th>
+        <th scope="col">place</th>
+        <th scope="col">S.jour</th>
+        <th scope="col">J.travailler</th>
+        <th scope="col">Salaire Actuel</th>
+        <th scope="col">Avance</th>
+        <th scope="col">Salaire Actuel net</th>
+      </tr>
+    </thead>
+    <tbody id="displayEmployers">
+  
+
+    </tbody>
+  </table>
+</div>
+<script>
+  $("#displayForm").click(function () {
+            if ($("#addEmployer").is(":hidden")) {
+                $("#addEmployer").slideDown("slow");
+            } else {
+                $("#addEmployer").hide();
+            }
+            
+
+        })
+  $("#addEmployer").submit(function (e) {
+    e.preventDefault();
+    var data = $("#addEmployer").serialize();
+    // alert(JSON.stringify(data));
+    $.ajax({
+      url: 'employer/addEmployer.php',
+      type: 'POST',
+      data: data,
+      success: function (res) {
+        $('#addEmployer')[0].reset();
+        alert(res)
+
+      }
+    })
+  })
+
+  $('body').on("submit","#UpdateEmployer",function (e) {
+    e.preventDefault();
+    var data = $("#UpdateEmployer").serialize();
+    // alert(JSON.stringify(data));
+    $.ajax({
+      url: 'employer/updateEmployer.php',
+      type: 'POST',
+      data: data,
+      success: function (res) {
+        $('#UpdateEmployer')[0].reset();
+        getEmployers();
+       // alert(res)
+
+      }
+    })
+  })
+  function getEmployers() {
+    $.ajax({
+      url: "employer/getEmployers.php",
+      type: 'GET',
+      // added data type
+      dataType: "json",
+      success: function (res) {
+        var g=''
+        $(res).each(function(){
+          g+=`<tr class="table-active">
+        <th scope="row">${this.name} ${this.lastName} <i class="fas fa-users-cog fa-lg btn btn-success float-right" onclick="updateEmployer(${this.id})"></i></th>
+        <td>${this.market.name}</td>
+        <td>${this.daySalary}</td>
+        <td>${this.dayWorks}</td>
+        <td>${this.Salary}</td>
+        <td>${this.Avance}</td>
+        <td>${this.NetSalary}</td>
+      </tr>`
+        })
+     $("#displayEmployers").empty().append(g)
+
+      }
+    })
+  }
+  $(document).ready(function () {
+    getEmployers()
+    createMarkets()
+    testDark()
+  })
+  function createMarkets(val=0) {
+    $.ajax({
+      url: "market/getMarkets.php",
+      type: 'GET',
+      // added data type
+      dataType: "json",
+      success: function (res) {
+        var g = ''
+        $(res).each(function () {
+          g += `<option  value="${this.id}">${this.name}</option>`
+
+        })
+        $("#exampleSelect2").empty().append(g);
+        if(val>0){
+          //alert('hhhhhhhh')
+          $("#exampleSelect2").val(val) 
+        }
+      }
+    })
+    return $("#exampleSelect2")
+  }
+   function updateEmployer(id){
+  // alert('update '+id);
+   $.ajax({
+      url: "employer/getEmployerToUpdate.php?id="+id,
+      type: 'GET',
+      success: function (res) {
+        res=JSON.parse(res)
+        var g=`<form method="POST" id="UpdateEmployer" action="#" class="mt-4 form-card">
+    <fieldset>
+      <input type="hidden" name="id" value=${res.id}>
+      <legend>Update Employer</legend>
+      <div class="form-group">
+        <label for="exampleInputEmail1">name Employer</label>
+        <input type="text" class="form-control" name="name" id="name" placeholder="Nom " value="${res.name}">
+      </div>
+      <div class="form-group">
+        <label for="exampleInputEmail1">prenom </label>
+        <input type="text" class="form-control" name="lastName" id="name" placeholder="prenom"  value="${res.lastName}">
+      </div>
+      <div class="form-group">
+        <label for="exampleInputEmail1">salaire par jour</label>
+        <input type="number" step="0.01" class="form-control" name="daySalary" id="name" placeholder="salaire par jour" value="${res.daySalary}">
+      </div>
+
+      <div class="form-group">
+        <label for="exampleSelect2">market</label>
+        <select class="form-control" name="idMarket" id="exampleSelect2">
+          
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Ajouer</button>
+    </fieldset>
+  </form> `
+  $("#formPlace").empty().append(g);
+  createMarkets(res.idMarket)
+  
+
+      }
+      })
+ }
+</script>

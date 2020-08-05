@@ -1,0 +1,70 @@
+<div class="container-fluid">
+<form method="POST" id="addMarket" class="mt-4 form-card">
+    <fieldset>
+      <legend>Ajout maket</legend>
+      <div class="form-group">
+        <label for="exampleInputEmail1">name market</label>
+        <input type="text" class="form-control" name="name" id="nameMarket" id="name" placeholder="name market">
+      </div>
+      <button type="submit" class="btn btn-primary">Ajouer</button>
+    </fieldset>
+  </form>
+  <table class="table table-hover mt-4">
+    <thead>
+      <tr>
+        <th scope="col">Id</th>
+        <th scope="col">Nom</th>
+      </tr>
+    </thead>
+    <tbody id="displayMarkets">
+     
+    </tbody>
+  </table> 
+</div>
+<script>
+    $(document).ready(function(){
+        displayMarkets()
+       
+    })
+    function goToMarket(id){
+      localStorage.setItem('idMarket',id);
+      var route = new Route();
+      route.setCurrenView('marketController')
+      route.dispalyView('views');
+    }
+    function displayMarkets(){
+        $.ajax({
+            url: "market/getMarkets.php",
+            type: 'GET',
+            // added data type
+            dataType: "json",
+            success: function(res) {
+                var g=''
+                $(res).each(function(){
+                    g+=` <tr class="table-active">
+                            <th scope="row">${this.id}</th>
+                            <td style="cursor:pointer;" onclick="goToMarket(${this.id})" >${this.name}</td>
+                         </tr>`
+
+                })
+                $("#displayMarkets").empty().append(g);
+            }})
+    }
+      $("#addMarket").submit(function(e){
+      e.preventDefault();
+      //alert(JSON.stringify(data))
+      $.ajax({
+            url: "market/addMarket.php",
+            type: 'POST',
+            data:{name:$("#nameMarket").val()},
+           
+            dataType: "json",
+            success: function(res) {
+                if (res.success==true) {
+                    $("#nameMarket").val('') 
+                }
+                displayMarkets()
+            }})
+
+   })
+</script>
